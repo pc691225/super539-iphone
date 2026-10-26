@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Super539 授權登入</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
+    <script>
+        function getDeviceId() {
+          let id = localStorage.getItem("super539_device_id");
+          if (!id) {
+            id = "S539-" + Math.random().toString(36).substr(2,6).toUpperCase();
+            localStorage.setItem("super539_device_id", id);
+          }
+          return id;
+        }
+
+        // --- 新增：自動檢查並跳轉 ---
+        async function checkAutoLogin() {
+          const deviceId = getDeviceId();
+          try {
+            // 向 GAS 發送驗證請求，檢查此 deviceId 是否已存在會員資料中
+            const res = await fetch(`${GAS_URL}?action=check_status&deviceId=${deviceId}`);
+            const json = await res.json();
+
+            if (json.status === "success" && json.allowed === true) {
+              window.location.href = "index.html";
+            }
+          } catch (e) {
+            console.log("尚未綁定或連線失敗");
+          }
+        }
+
+        // 立即執行自動檢查
+        checkAutoLogin();
+
+        async function login() {
+          const name = document.getElementById("name").value.trim();
+          const phone = document.getElementById("phone").value.trim();
+          const serial = document.getElementById("serial").value.trim().toUpperCase();
+
+          if (!name || !phone || !serial) {
+            alert("請填寫完整資料");
+            return;
+          }
+
+          const params = new URLSearchParams({
+            action: "login",
+            name,
+            phone,
+            serial,
+            deviceId: getDeviceId()
+          });
+
+          try {
+            const res = await fetch(`${GAS_URL}?${params.toString()}`);
+            const json = await res.json();
+
+            if (json.status === "success") {
+              localStorage.setItem("binding_name", name);
+              localStorage.setItem("binding_phone", phone);
+              localStorage.setItem("binding_serial", serial);
+              window.location.href = "index.html";
+            } else {
+              alert(json.message || "驗證失敗");
+            }
+          } catch (e) {
+            alert("連線失敗");
+          }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-950 flex items-center justify-center min-h-screen text-white">
+<div class="w-full max-w-sm bg-slate-900 p-8 rounded-3xl border border-slate-800">
+    <h1 class="text-2xl font-black text-center mb-6 text-amber-500">SUPER539 授權</h1>
+
+    <input id="name" class="w-full mb-3 p-4 rounded-xl bg-slate-950 border border-slate-800" placeholder="會員姓名">
+    <input id="phone" class="w-full mb-3 p-4 rounded-xl bg-slate-950 border border-slate-800" placeholder="手機號碼">
+    <input id="serial" class="w-full mb-6 p-4 rounded-xl bg-slate-950 border border-slate-800 uppercase" placeholder="授權序號">
+
+    <button onclick="login()" class="w-full bg-amber-500 text-black font-black py-4 rounded-2xl">
+        綁定裝置
+    </button>
+</div>
+</body>
+</html>
