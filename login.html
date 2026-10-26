@@ -26,7 +26,7 @@
             const json = await res.json();
 
             if (json.status === "success" && json.allowed === true) {
-              window.location.href = "index.html";
+              window.location.href = "analysis.html";
             }
           } catch (e) {
             console.log("尚未綁定或連線失敗");
