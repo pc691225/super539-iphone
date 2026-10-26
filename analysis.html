@@ -1,30 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
     <title>539 AI 智能分析儀</title>
-
-    <!-- iPhone Safari / 主畫面設定 -->
     <meta name="theme-color" content="#0F1115">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Super539">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- 網站應用程式設定 -->
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icons/icon-180.png">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #0F1115;
@@ -36,79 +27,50 @@
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
         }
-
         ::-webkit-scrollbar { width: 0; }
-
         .glass-card {
             background: rgba(26, 29, 35, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-
         .lottery-ball {
             background: linear-gradient(135deg, #ff4d4d, #d60000);
             box-shadow: 0 4px 15px rgba(214,0,0,.4);
             animation: pop .4s ease-out;
         }
-
         @keyframes pop {
             0% { transform: scale(.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-
-        button:disabled {
-            opacity: .55;
-            cursor: not-allowed;
-        }
+        button:disabled { opacity: .55; cursor: not-allowed; }
     </style>
 </head>
-
 <body class="text-white" style="visibility:hidden">
-
 <nav class="sticky top-0 z-50 bg-[#0F1115]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between">
     <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-            <i data-lucide="trophy"></i>
-        </div>
+        <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center"><i data-lucide="trophy"></i></div>
         <h1 class="font-bold">539 AI智慧分析</h1>
     </div>
 </nav>
-
 <main class="max-w-md mx-auto px-5 py-6 space-y-6 pb-24">
-
     <div class="glass-card rounded-3xl p-5">
         <p class="text-xs text-neutral-400">分析引擎</p>
         <p class="text-lg font-bold">雲端即時模型</p>
-        <p id="connectionStatus" class="text-xs text-neutral-400 mt-2">等待操作</p>
+        <p id="connectionStatus" class="text-xs text-neutral-400 mt-2">正在檢查會員授權</p>
     </div>
-
     <div class="glass-card rounded-3xl p-5">
         <div class="flex items-center gap-2 mb-2">
-            <i data-lucide="database" class="text-green-400"></i>
-            <h2 class="font-bold">開獎資料管理</h2>
+            <i data-lucide="database" class="text-green-400"></i><h2 class="font-bold">開獎資料管理</h2>
         </div>
-
-        <p class="text-sm text-neutral-400 mb-4">
-            從台灣彩券資料來源更新今彩539開獎紀錄。
-        </p>
-
-        <button
-            id="updateButton"
-            onclick="updateLotteryData()"
-            class="w-full h-14 bg-green-600 hover:bg-green-700 rounded-2xl font-bold flex items-center justify-center gap-2">
-            <i data-lucide="refresh-cw"></i>
-            更新開獎資料
+        <p class="text-sm text-neutral-400 mb-4">從台灣彩券資料來源更新今彩539開獎紀錄。</p>
+        <button id="updateButton" type="button" onclick="updateLotteryData()" class="w-full h-14 bg-green-600 hover:bg-green-700 rounded-2xl font-bold flex items-center justify-center gap-2">
+            <i data-lucide="refresh-cw"></i>更新開獎資料
         </button>
-
-        <p id="updateStatus" class="text-sm text-neutral-300 mt-4 leading-6">
-            尚未執行更新
-        </p>
+        <p id="updateStatus" class="text-sm text-neutral-300 mt-4 leading-6">尚未執行更新</p>
     </div>
-
     <div class="bg-[#1A1D23] rounded-[2.5rem] p-8 border border-white/10 shadow-2xl text-center">
         <h2 class="text-2xl font-black mb-8">今日預測組合</h2>
-
         <div id="ballContainer" class="flex justify-between mb-10 px-1">
             <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
             <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
@@ -116,123 +78,145 @@
             <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
             <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
         </div>
-
-        <button
-            id="analysisButton"
-            onclick="drawNumbers()"
-            class="w-full h-16 bg-white text-black rounded-2xl font-black text-lg">
-            啟動 AI 分析
-        </button>
-
-        <p class="text-xs text-neutral-500 mt-4">
-            號碼組合僅供統計分析參考，不代表中獎機率提高。
-        </p>
+        <p id="predictionInfo" class="text-xs text-neutral-500 mb-4"></p>
+        <button id="analysisButton" type="button" onclick="drawNumbers()" class="w-full h-16 bg-white text-black rounded-2xl font-black text-lg">啟動 AI 分析</button>
+        <p class="text-xs text-neutral-500 mt-4">號碼組合僅供統計分析參考，不代表中獎機率提高。</p>
     </div>
-
 </main>
-
 <script>
-    // 取得登入頁儲存的裝置 ID
+(() => {
+    "use strict";
+
+    const LOGIN_PAGE = "./login.html";
+    const DEVICE_KEYS = ["super539_device_id", "app_device_id"];
+    let accessVerified = false;
+    let accessCheckInProgress = false;
+
     function getDeviceId() {
-        return localStorage.getItem("super539_device_id")
-            || localStorage.getItem("app_device_id")
-            || "";
+        for (const key of DEVICE_KEYS) {
+            const value = (localStorage.getItem(key) || "").trim();
+            if (value) return value;
+        }
+        return "";
+    }
+
+    function saveDeviceId(id) {
+        const value = String(id || "").trim();
+        if (!value) return;
+        DEVICE_KEYS.forEach(key => localStorage.setItem(key, value));
     }
 
     function setConnectionStatus(message) {
-        document.getElementById("connectionStatus").textContent = message;
+        const element = document.getElementById("connectionStatus");
+        if (element) element.textContent = message;
     }
 
     function getErrorMessage(json) {
-        return json?.message
-            || json?.error
-            || "伺服器沒有提供詳細錯誤訊息";
+        return json?.message || json?.error || "伺服器沒有提供詳細錯誤訊息";
     }
 
     function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, char => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
         })[char]);
     }
 
-    // 進入分析畫面前，先檢查會員裝置授權
-    async function verifyAccess() {
-        const deviceId = getDeviceId();
-
-        if (!deviceId) {
-            window.location.replace("./login.html");
-            return;
-        }
-
-        if (typeof GAS_URL === "undefined" || !GAS_URL) {
-            showAccessError("找不到 GAS API 設定，請檢查 config.js。");
-            return;
-        }
-
-        try {
-            const url = new URL(GAS_URL);
-            url.searchParams.set("action", "check_status");
-            url.searchParams.set("deviceId", deviceId);
-
-            const response = await fetch(url.toString(), {
-                cache: "no-store"
-            });
-
-            if (!response.ok) {
-                throw new Error("伺服器 HTTP 狀態碼：" + response.status);
-            }
-
-            const json = await response.json();
-
-            if (json.status === "success" && json.allowed === true) {
-                document.body.style.visibility = "visible";
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-
-                setConnectionStatus("會員授權驗證成功");
-                return;
-            }
-
-            // 未授權裝置返回登入頁
-            window.location.replace("./login.html");
-
-        } catch (error) {
-            console.error("會員授權檢查失敗：", error);
-            showAccessError("目前無法驗證會員資格，請檢查網路後重新開啟。");
+    function showPage() {
+        document.body.style.visibility = "visible";
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
         }
     }
 
     function showAccessError(message) {
-        document.body.style.visibility = "visible";
+        showPage();
         document.body.innerHTML = `
-            <main style="padding:32px;color:white;font-family:sans-serif">
+            <main style="padding:32px;color:white;font-family:sans-serif;max-width:520px;margin:auto">
                 <h2 style="font-size:22px;margin-bottom:16px">無法驗證會員授權</h2>
                 <p style="line-height:1.8;margin-bottom:24px">${escapeHtml(message)}</p>
-                <button onclick="window.location.reload()"
+                <button id="retryAccessButton" type="button"
                     style="padding:12px 20px;background:#f59e0b;color:#111;border-radius:12px;font-weight:bold">
                     重新驗證
                 </button>
-                <p style="margin-top:16px">
-                    <a href="./login.html" style="color:#fbbf24">返回會員登入</a>
-                </p>
-            </main>
-        `;
+                <p style="margin-top:16px"><a href="${LOGIN_PAGE}" style="color:#fbbf24">返回會員登入</a></p>
+            </main>`;
+        document.getElementById("retryAccessButton")?.addEventListener("click", verifyAccess);
     }
 
-    // 更新台灣彩券開獎資料
+    function requireGasUrl() {
+        if (typeof GAS_URL === "undefined" || !String(GAS_URL).trim()) {
+            throw new Error("找不到 GAS API 網址，請檢查 config.js。");
+        }
+        return String(GAS_URL).trim();
+    }
+
+    async function apiGet(action, params = {}) {
+        const baseUrl = requireGasUrl();
+        const url = new URL(baseUrl);
+        url.searchParams.set("action", action);
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) url.searchParams.set(key, String(value));
+        });
+
+        const response = await fetch(url.toString(), { method: "GET", cache: "no-store" });
+        if (!response.ok) throw new Error("伺服器 HTTP 狀態碼：" + response.status);
+        let json;
+        try {
+            json = await response.json();
+        } catch {
+            throw new Error("GAS 回應不是有效 JSON，請確認部署版本及 API 網址。");
+        }
+        return json;
+    }
+
+    async function verifyAccess() {
+        if (accessCheckInProgress) return;
+        accessCheckInProgress = true;
+        const retryButton = document.getElementById("retryAccessButton");
+        if (retryButton) retryButton.disabled = true;
+
+        const deviceId = getDeviceId();
+        if (!deviceId) {
+            window.location.replace(LOGIN_PAGE);
+            return;
+        }
+
+        try {
+            setConnectionStatus("正在檢查會員授權");
+            const json = await apiGet("check_status", { deviceId });
+
+            if (json.status === "success" && json.allowed === true) {
+                accessVerified = true;
+                showPage();
+                setConnectionStatus("會員授權驗證成功");
+                return;
+            }
+
+            // 伺服器明確回覆未授權：不繼續顯示分析功能
+            window.location.replace(LOGIN_PAGE);
+        } catch (error) {
+            console.error("會員授權檢查失敗：", error);
+            accessCheckInProgress = false;
+            showAccessError(error.message || "目前無法驗證會員資格，請檢查網路後重試。");
+        }
+    }
+
+    function ensureAccess() {
+        if (!accessVerified) {
+            window.location.replace(LOGIN_PAGE);
+            return false;
+        }
+        return true;
+    }
+
     async function updateLotteryData() {
+        if (!ensureAccess()) return;
+
         const button = document.getElementById("updateButton");
         const status = document.getElementById("updateStatus");
         const deviceId = getDeviceId();
-
         if (!deviceId) {
-            window.location.replace("./login.html");
+            window.location.replace(LOGIN_PAGE);
             return;
         }
 
@@ -242,21 +226,12 @@
         setConnectionStatus("正在更新開獎資料");
 
         try {
-            const url = new URL(GAS_URL);
-            url.searchParams.set("action", "update_539");
-            url.searchParams.set("deviceId", deviceId);
-
-            const response = await fetch(url.toString(), {
-                cache: "no-store"
-            });
-
-            if (!response.ok) {
-                throw new Error("伺服器 HTTP 狀態碼：" + response.status);
-            }
-
-            const json = await response.json();
-
-            if (json.status !== "success") {
+            const json = await apiGet("update_539", { deviceId });
+            if (json.status !== "success" || json.allowed === false) {
+                if (json.allowed === false) {
+                    window.location.replace(LOGIN_PAGE);
+                    return;
+                }
                 throw new Error(getErrorMessage(json));
             }
 
@@ -265,96 +240,77 @@
                 查詢資料：${Number(json.queriedRecords ?? 0)} 筆<br>
                 新增資料：${Number(json.insertedRecords ?? 0)} 筆<br>
                 略過無效資料：${Number(json.skippedInvalidRecords ?? 0)} 筆<br>
-                <span class="text-neutral-400">${escapeHtml(json.message || "開獎資料已處理完成")}</span>
-            `;
-
+                <span class="text-neutral-400">${escapeHtml(json.message || "開獎資料已處理完成")}</span>`;
             setConnectionStatus("開獎資料更新成功");
-
         } catch (error) {
-            status.innerHTML = `
-                <span class="text-red-400 font-bold">更新失敗</span><br>
-                <span class="text-neutral-300">${escapeHtml(error.message || "請檢查網路或 GAS 設定")}</span>
-            `;
-
+            status.innerHTML = `<span class="text-red-400 font-bold">更新失敗</span><br><span class="text-neutral-300">${escapeHtml(error.message || "請檢查網路或 GAS 設定")}</span>`;
             setConnectionStatus("更新失敗");
             console.error("更新539資料失敗：", error);
-
         } finally {
             button.disabled = false;
-            button.innerHTML = '<i data-lucide="refresh-cw"></i> 更新開獎資料';
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+            button.innerHTML = '<i data-lucide="refresh-cw"></i>更新開獎資料';
+            if (window.lucide) window.lucide.createIcons();
         }
     }
 
-    // 讀取分析資料
     async function drawNumbers() {
+        if (!ensureAccess()) return;
+
         const box = document.getElementById("ballContainer");
         const button = document.getElementById("analysisButton");
+        const info = document.getElementById("predictionInfo");
         const deviceId = getDeviceId();
-
         if (!deviceId) {
-            window.location.replace("./login.html");
+            window.location.replace(LOGIN_PAGE);
             return;
         }
 
         button.disabled = true;
         box.innerHTML = '<div class="w-full text-center text-neutral-500">分析中...</div>';
+        info.textContent = "";
         setConnectionStatus("正在讀取分析資料");
 
         try {
-            const url = new URL(GAS_URL);
-            url.searchParams.set("action", "get_analysis_data");
-            url.searchParams.set("deviceId", deviceId);
+            const json = await apiGet("get_analysis_data", { deviceId });
 
-            const res = await fetch(url.toString(), {
-                cache: "no-store"
-            });
-
-            if (!res.ok) {
-                throw new Error("伺服器 HTTP 狀態碼：" + res.status);
+            if (json.allowed === false || /設備未授權|請重新登入/.test(String(json.message || ""))) {
+                window.location.replace(LOGIN_PAGE);
+                return;
             }
-
-            const json = await res.json();
-
-            if (json.status !== "success") {
-                throw new Error(getErrorMessage(json));
-            }
+            if (json.status !== "success") throw new Error(getErrorMessage(json));
 
             const nums = json.recommended;
-
             if (!Array.isArray(nums) || nums.length !== 5) {
                 throw new Error("伺服器回傳的推薦號碼格式不正確");
             }
 
-            box.innerHTML = nums.map(n => `
-                <div class="w-12 h-12 rounded-full lottery-ball flex items-center justify-center text-xl font-black">
-                    ${escapeHtml(String(n).padStart(2, "0"))}
-                </div>
+            const validNums = nums.map(Number);
+            if (validNums.some(n => !Number.isInteger(n) || n < 1 || n > 39) ||
+                new Set(validNums).size !== 5) {
+                throw new Error("伺服器回傳的號碼必須是 1 至 39 的五個不重複整數");
+            }
+
+            box.innerHTML = validNums.map(n => `
+                <div class="w-12 h-12 rounded-full lottery-ball flex items-center justify-center text-xl font-black">${String(n).padStart(2, "0")}</div>
             `).join("");
 
+            if (json.predictionDateTime) {
+                info.textContent = `今日共用預測建立時間：${json.predictionDateTime}${json.predictionReused ? "（沿用今日預測）" : "（今日首次建立）"}`;
+            }
             setConnectionStatus("分析資料讀取完成");
-
         } catch (error) {
-            box.innerHTML = `
-                <div class="w-full text-center text-red-400 text-sm">
-                    ${escapeHtml(error.message || "資料讀取失敗")}
-                </div>
-            `;
-
+            box.innerHTML = `<div class="w-full text-center text-red-400 text-sm">${escapeHtml(error.message || "資料讀取失敗")}</div>`;
             setConnectionStatus("分析失敗");
             console.error("539分析失敗：", error);
-
         } finally {
             button.disabled = false;
         }
     }
 
-    // 頁面載入後先驗證，再顯示分析介面
+    window.updateLotteryData = updateLotteryData;
+    window.drawNumbers = drawNumbers;
     window.addEventListener("DOMContentLoaded", verifyAccess);
+})();
 </script>
-
 </body>
 </html>
