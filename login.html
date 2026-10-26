@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -24,111 +23,80 @@
             padding-right: env(safe-area-inset-right);
         }
         [hidden] { display: none !important; }
+        input { color: #fff; }
+        input::placeholder { color: #64748b; }
+        button:disabled { opacity: .6; cursor: not-allowed; }
     </style>
 </head>
 
 <body class="bg-slate-950 flex items-center justify-center min-h-screen text-white">
-
 <div class="w-full max-w-sm mx-4 bg-slate-900 p-8 rounded-3xl border border-slate-800">
-
-    <h1 class="text-2xl font-black text-center mb-2 text-amber-500">
-        SUPER539
-    </h1>
-
-    <p class="text-center text-slate-400 text-sm mb-6">
-        雲端分析・會員裝置授權
-    </p>
+    <h1 class="text-2xl font-black text-center mb-2 text-amber-500">SUPER539</h1>
+    <p class="text-center text-slate-400 text-sm mb-6">雲端分析・會員裝置授權</p>
 
     <div id="checkingBox" class="text-center py-6">
-        <p class="text-amber-400 font-bold">正在檢查會員授權……</p>
+        <p id="checkingMessage" class="text-amber-400 font-bold">正在檢查會員授權……</p>
         <p class="text-sm text-slate-400 mt-2">請稍候，不需要重複輸入資料</p>
         <p id="checkingDevice" class="text-xs text-slate-500 mt-3 break-all"></p>
     </div>
 
     <div id="loginForm" hidden>
-        <p id="loginMessage" class="text-sm text-slate-300 mb-4">
-            正在確認裝置狀態。
-        </p>
-
-        <p class="text-xs text-slate-500 mb-4 break-all">
-            目前設備 ID：<span id="deviceIdDisplay"></span>
-        </p>
+        <p id="loginMessage" class="text-sm text-slate-300 mb-4">正在確認裝置狀態。</p>
+        <p class="text-xs text-slate-500 mb-4 break-all">目前設備 ID：<span id="deviceIdDisplay">尚未建立</span></p>
 
         <label for="name" class="block text-sm text-slate-300 mb-1">會員姓名</label>
-        <input id="name" autocomplete="name"
-            class="w-full mb-4 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white"
-            placeholder="請輸入會員姓名">
+        <input id="name" autocomplete="name" class="w-full mb-4 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="請輸入會員姓名">
 
         <label for="phone" class="block text-sm text-slate-300 mb-1">手機號碼</label>
-        <input id="phone" type="tel" inputmode="tel" autocomplete="tel"
-            class="w-full mb-4 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white"
-            placeholder="請輸入手機號碼">
+        <input id="phone" type="tel" inputmode="tel" autocomplete="tel" class="w-full mb-4 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="請輸入手機號碼">
 
         <label for="serial" class="block text-sm text-slate-300 mb-1">授權序號</label>
-        <input id="serial" autocomplete="off" autocapitalize="characters"
-            class="w-full mb-6 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white uppercase"
-            placeholder="請輸入授權序號">
+        <input id="serial" autocomplete="off" autocapitalize="characters" class="w-full mb-6 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white uppercase" placeholder="請輸入授權序號">
 
-        <button id="loginButton" type="button"
-            class="w-full bg-amber-500 text-black font-black py-4 rounded-2xl">
-            綁定裝置
-        </button>
-
-        <button id="retryButton" type="button"
-            class="w-full mt-3 py-3 text-sm text-slate-400">
-            重新檢查授權
-        </button>
+        <button id="loginButton" type="button" class="w-full bg-amber-500 text-black font-black py-4 rounded-2xl">核對會員並登入</button>
+        <button id="retryButton" type="button" class="w-full mt-3 py-3 text-sm text-slate-400">重新檢查授權</button>
     </div>
 
     <div id="errorBox" hidden class="text-center py-4">
         <p id="errorMessage" class="text-red-400 text-sm leading-6"></p>
-        <button id="errorRetryButton" type="button"
-            class="w-full mt-4 bg-amber-500 text-black font-bold py-3 rounded-xl">
-            重新檢查
-        </button>
+        <button id="errorRetryButton" type="button" class="w-full mt-4 bg-amber-500 text-black font-bold py-3 rounded-xl">重新檢查</button>
+        <button id="errorLoginButton" type="button" class="w-full mt-2 py-3 text-sm text-slate-400">改用會員資料登入</button>
     </div>
-
 </div>
 
 <script>
-    /*
-     * 不要在找不到設備 ID 時立即產生新 ID。
-     * 先讀取現有的兩個 key，避免覆蓋舊版保存的設備號。
-     */
     function getExistingDeviceId() {
-        return localStorage.getItem("super539_device_id")
-            || localStorage.getItem("app_device_id")
-            || "";
+        return (localStorage.getItem("super539_device_id") ||
+                localStorage.getItem("app_device_id") || "").trim();
     }
 
     function saveDeviceId(id) {
-        if (!id) return;
-        localStorage.setItem("super539_device_id", id);
-        localStorage.setItem("app_device_id", id);
+        const value = String(id || "").trim();
+        if (!value) throw new Error("伺服器沒有回傳有效的設備 ID，不能保存登入狀態。");
+        localStorage.setItem("super539_device_id", value);
+        localStorage.setItem("app_device_id", value); // 舊版相容
     }
 
     function generateDeviceId() {
-        return "S539-" +
-            Math.random().toString(36).substring(2, 8).toUpperCase();
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            return "S539-" + window.crypto.randomUUID().replace(/-/g, "").slice(0, 16).toUpperCase();
+        }
+        return "S539-" + Math.random().toString(36).substring(2, 10).toUpperCase() + Date.now().toString(36).toUpperCase();
     }
 
     function showChecking(message) {
         document.getElementById("checkingBox").hidden = false;
         document.getElementById("loginForm").hidden = true;
         document.getElementById("errorBox").hidden = true;
-
-        document.getElementById("checkingBox").querySelector("p").textContent =
-            message;
+        document.getElementById("checkingMessage").textContent = message;
     }
 
     function showLoginForm(message, deviceId) {
         document.getElementById("checkingBox").hidden = true;
         document.getElementById("errorBox").hidden = true;
         document.getElementById("loginForm").hidden = false;
-
         document.getElementById("loginMessage").textContent = message;
-        document.getElementById("deviceIdDisplay").textContent =
-            deviceId || "尚未建立";
+        document.getElementById("deviceIdDisplay").textContent = deviceId || "登入核對後由伺服器確認";
     }
 
     function showConnectionError(message) {
@@ -138,75 +106,52 @@
         document.getElementById("errorMessage").textContent = message;
     }
 
-    async function checkDevice(deviceId) {
-        const url = new URL(GAS_URL);
-        url.searchParams.set("action", "check_status");
-        url.searchParams.set("deviceId", deviceId);
-
-        const response = await fetch(url.toString(), {
-            cache: "no-store"
-        });
-
-        if (!response.ok) {
-            throw new Error("伺服器 HTTP 狀態碼：" + response.status);
+    function getGasUrl() {
+        if (typeof GAS_URL === "undefined" || !GAS_URL) {
+            throw new Error("找不到 GAS API 網址，請檢查 config.js 中的 GAS_URL。");
         }
+        return GAS_URL;
+    }
 
+    async function requestGas(params) {
+        const url = new URL(getGasUrl());
+        Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, String(value ?? "")));
+        const response = await fetch(url.toString(), { method: "GET", cache: "no-store", redirect: "follow" });
+        if (!response.ok) throw new Error("伺服器 HTTP 狀態碼：" + response.status);
         return await response.json();
+    }
+
+    async function checkDevice(deviceId) {
+        return await requestGas({ action: "check_status", deviceId });
     }
 
     async function checkAutoLogin() {
         showChecking("正在檢查會員授權……");
-
-        if (typeof GAS_URL === "undefined" || !GAS_URL) {
-            showConnectionError("找不到 GAS API 網址，請檢查 config.js。");
-            return;
-        }
-
-        /*
-         * 第一優先：使用本機已保存的 ID。
-         */
         let deviceId = getExistingDeviceId();
 
         try {
-            if (deviceId) {
-                document.getElementById("checkingDevice").textContent =
-                    "設備 ID：" + deviceId;
-
-                const result = await checkDevice(deviceId);
-
-                console.log("既有設備授權檢查：", result);
-
-                if (result.status === "success" && result.allowed === true) {
-                    saveDeviceId(deviceId);
-                    window.location.replace("./analysis.html");
-                    return;
-                }
-
-                /*
-                 * 伺服器明確回覆未授權時，不自動換新 ID。
-                 * 避免不斷產生新設備號。
-                 */
-                showLoginForm(
-                    result.message || "目前設備尚未獲得授權，請確認會員資料。",
-                    deviceId
-                );
+            getGasUrl();
+            if (!deviceId) {
+                showLoginForm("此瀏覽環境沒有保存設備 ID。請輸入會員姓名、手機及授權序號，由伺服器核對原有會員資料。", "");
                 return;
             }
 
-            /*
-             * 本機完全沒有 ID 時，不假設是新會員。
-             * 顯示會員表單，等會員輸入原有資料後再向 GAS 核對。
-             */
-            showLoginForm(
-                "此瀏覽環境沒有保存設備 ID。請先核對原有會員資料，不要隨意重新綁定。",
-                ""
-            );
+            document.getElementById("checkingDevice").textContent = "設備 ID：" + deviceId;
+            const result = await checkDevice(deviceId);
+            console.log("既有設備授權檢查：", result);
 
+            if (result.status === "success" && result.allowed === true) {
+                // 以伺服器回傳的 ID 為準，避免前端沿用錯誤 ID。
+                const canonicalId = String(result.deviceId || deviceId).trim();
+                saveDeviceId(canonicalId);
+                window.location.replace("./analysis.html");
+                return;
+            }
+
+            showLoginForm(result.message || "目前設備尚未獲得授權，請使用會員資料重新核對。", deviceId);
         } catch (error) {
             console.error("會員授權檢查失敗：", error);
-            showConnectionError(
-                "目前無法連線驗證會員資格。請檢查網路後重新檢查；尚未更改原有設備資料。"
-            );
+            showConnectionError("目前無法連線驗證會員資格。請檢查網路或 config.js，再重新檢查。原有設備資料未由此頁面更改。\n" + (error.message || ""));
         }
     }
 
@@ -217,12 +162,7 @@
         const button = document.getElementById("loginButton");
 
         if (!name || !phone || !serial) {
-            alert("請填寫完整資料");
-            return;
-        }
-
-        if (typeof GAS_URL === "undefined" || !GAS_URL) {
-            alert("找不到 GAS API 網址，請檢查 config.js。");
+            alert("請填寫會員姓名、手機號碼及授權序號。");
             return;
         }
 
@@ -230,83 +170,60 @@
         button.textContent = "正在核對會員資料……";
 
         try {
-            /*
-             * 先使用目前 ID；如果這個瀏覽環境沒有 ID，
-             * 先查詢原有會員資料的核對流程需要由 GAS 支援。
-             *
-             * 此處不會把猜測的 ID 當成原有已授權 ID。
-             */
-            let deviceId = getExistingDeviceId();
-
-            if (!deviceId) {
-                deviceId = generateDeviceId();
-            }
-
-            const params = new URLSearchParams({
+            // 無本機 ID 時可提出新 ID，但登入後必須採用 GAS 回傳的正式 ID。
+            const submittedDeviceId = getExistingDeviceId() || generateDeviceId();
+            const result = await requestGas({
                 action: "login",
-                name: name,
-                phone: phone,
-                serial: serial,
-                deviceId: deviceId
+                name,
+                phone,
+                serial,
+                deviceId: submittedDeviceId
             });
-
-            const response = await fetch(
-                `${GAS_URL}?${params.toString()}`,
-                { cache: "no-store" }
-            );
-
-            if (!response.ok) {
-                throw new Error("伺服器 HTTP 狀態碼：" + response.status);
-            }
-
-            const result = await response.json();
-
             console.log("登入回應：", result);
 
-            if (result.status === "success") {
-                saveDeviceId(deviceId);
-
-                localStorage.setItem("binding_name", name);
-                localStorage.setItem("binding_phone", phone);
-                localStorage.setItem("binding_serial", serial);
-
-                // 重新向伺服器確認，不直接假設授權成功
-                const verified = await checkDevice(deviceId);
-
-                if (verified.status === "success" && verified.allowed === true) {
-                    window.location.replace("./analysis.html");
-                    return;
-                }
-
-                showLoginForm(
-                    verified.message || "登入已回應成功，但伺服器尚未確認設備授權。請勿重複綁定。",
-                    deviceId
-                );
-
-            } else {
-                showLoginForm(
-                    result.message || "會員資料核對失敗，原有資料未由此頁面修改。",
-                    deviceId
-                );
+            if (result.status !== "success" || result.allowed === false) {
+                showLoginForm(result.message || "會員資料核對失敗，請確認輸入內容。", submittedDeviceId);
+                return;
             }
 
+            // 重要：若 GAS 找回的是會員表內既有設備 ID，必須使用它，不能使用剛產生的 ID。
+            const canonicalId = String(result.deviceId || submittedDeviceId).trim();
+            saveDeviceId(canonicalId);
+            localStorage.setItem("binding_name", name);
+            localStorage.setItem("binding_phone", phone);
+            localStorage.setItem("binding_serial", serial);
+
+            const verified = await checkDevice(canonicalId);
+            console.log("登入後二次授權確認：", verified);
+
+            if (verified.status === "success" && verified.allowed === true) {
+                const verifiedId = String(verified.deviceId || canonicalId).trim();
+                saveDeviceId(verifiedId);
+                window.location.replace("./analysis.html");
+                return;
+            }
+
+            showLoginForm(
+                verified.message || "會員核對已回應成功，但設備授權尚未通過。請勿連續重複綁定；請確認 GAS 後端登入回應有回傳 deviceId。",
+                canonicalId
+            );
         } catch (error) {
             console.error("登入或核對失敗：", error);
-            showConnectionError(
-                "無法完成會員核對：" + (error.message || "請檢查網路連線")
-            );
+            showConnectionError("無法完成會員核對：" + (error.message || "請檢查網路連線"));
         } finally {
             button.disabled = false;
-            button.textContent = "綁定裝置";
+            button.textContent = "核對會員並登入";
         }
     }
 
     document.getElementById("loginButton").addEventListener("click", login);
     document.getElementById("retryButton").addEventListener("click", checkAutoLogin);
     document.getElementById("errorRetryButton").addEventListener("click", checkAutoLogin);
+    document.getElementById("errorLoginButton").addEventListener("click", function () {
+        showLoginForm("請輸入會員資料，由 GAS 後端核對授權。", getExistingDeviceId());
+    });
 
     checkAutoLogin();
 </script>
-
 </body>
 </html>
