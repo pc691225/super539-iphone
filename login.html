@@ -1,89 +1,188 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
     <title>Super539 授權登入</title>
+
+    <!-- iPhone Safari / 主畫面設定 -->
+    <meta name="theme-color" content="#0F1115">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Super539">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- 網站應用程式設定 -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-180.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
+
+    <style>
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+    </style>
+
     <script>
         function getDeviceId() {
-          let id = localStorage.getItem("super539_device_id");
-          if (!id) {
-            id = "S539-" + Math.random().toString(36).substr(2,6).toUpperCase();
-            localStorage.setItem("super539_device_id", id);
-          }
-          return id;
-        }
+            let id = localStorage.getItem("super539_device_id");
 
-        // --- 新增：自動檢查並跳轉 ---
-        async function checkAutoLogin() {
-          const deviceId = getDeviceId();
-          try {
-            // 向 GAS 發送驗證請求，檢查此 deviceId 是否已存在會員資料中
-            const res = await fetch(`${GAS_URL}?action=check_status&deviceId=${deviceId}`);
-            const json = await res.json();
+            if (!id) {
+                id = "S539-" +
+                    Math.random().toString(36).substring(2, 8).toUpperCase();
 
-            if (json.status === "success" && json.allowed === true) {
-              window.location.href = "analysis.html";
+                localStorage.setItem("super539_device_id", id);
             }
-          } catch (e) {
-            console.log("尚未綁定或連線失敗");
-          }
+
+            return id;
         }
 
-        // 立即執行自動檢查
-        checkAutoLogin();
+        // 檢查裝置是否已經完成授權
+        async function checkAutoLogin() {
+            const deviceId = getDeviceId();
+
+            try {
+                const url = new URL(GAS_URL);
+                url.searchParams.set("action", "check_status");
+                url.searchParams.set("deviceId", deviceId);
+
+                const res = await fetch(url.toString(), {
+                    cache: "no-store"
+                });
+
+                const json = await res.json();
+
+                if (json.status === "success" && json.allowed === true) {
+                    window.location.replace("./analysis.html");
+                }
+            } catch (e) {
+                console.error("自動授權檢查失敗：", e);
+            }
+        }
 
         async function login() {
-          const name = document.getElementById("name").value.trim();
-          const phone = document.getElementById("phone").value.trim();
-          const serial = document.getElementById("serial").value.trim().toUpperCase();
+            const name = document.getElementById("name").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const serial = document.getElementById("serial").value.trim().toUpperCase();
+            const button = document.getElementById("loginButton");
 
-          if (!name || !phone || !serial) {
-            alert("請填寫完整資料");
-            return;
-          }
-
-          const params = new URLSearchParams({
-            action: "login",
-            name,
-            phone,
-            serial,
-            deviceId: getDeviceId()
-          });
-
-          try {
-            const res = await fetch(`${GAS_URL}?${params.toString()}`);
-            const json = await res.json();
-
-            if (json.status === "success") {
-              localStorage.setItem("binding_name", name);
-              localStorage.setItem("binding_phone", phone);
-              localStorage.setItem("binding_serial", serial);
-              window.location.href = "analysis.html";
-            } else {
-              alert(json.message || "驗證失敗");
+            if (!name || !phone || !serial) {
+                alert("請填寫完整資料");
+                return;
             }
-          } catch (e) {
-            alert("連線失敗");
-          }
+
+            if (typeof GAS_URL === "undefined" || !GAS_URL) {
+                alert("尚未設定 GAS API 網址，請檢查 config.js");
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "正在驗證……";
+
+            const params = new URLSearchParams({
+                action: "login",
+                name: name,
+                phone: phone,
+                serial: serial,
+                deviceId: getDeviceId()
+            });
+
+            try {
+                const res = await fetch(`${GAS_URL}?${params.toString()}`, {
+                    cache: "no-store"
+                });
+
+                const json = await res.json();
+
+                if (json.status === "success") {
+                    localStorage.setItem("binding_name", name);
+                    localStorage.setItem("binding_phone", phone);
+                    localStorage.setItem("binding_serial", serial);
+
+                    window.location.replace("./analysis.html");
+                } else {
+                    alert(json.message || "授權驗證失敗");
+                }
+            } catch (e) {
+                console.error("登入錯誤：", e);
+                alert("連線失敗，請檢查網路或 GAS API 設定");
+            } finally {
+                button.disabled = false;
+                button.textContent = "綁定裝置";
+            }
         }
+
+        // 網頁載入後執行自動授權檢查
+        window.addEventListener("DOMContentLoaded", checkAutoLogin);
     </script>
 </head>
 
 <body class="bg-slate-950 flex items-center justify-center min-h-screen text-white">
-<div class="w-full max-w-sm bg-slate-900 p-8 rounded-3xl border border-slate-800">
-    <h1 class="text-2xl font-black text-center mb-6 text-amber-500">SUPER539 授權</h1>
 
-    <input id="name" class="w-full mb-3 p-4 rounded-xl bg-slate-950 border border-slate-800" placeholder="會員姓名">
-    <input id="phone" class="w-full mb-3 p-4 rounded-xl bg-slate-950 border border-slate-800" placeholder="手機號碼">
-    <input id="serial" class="w-full mb-6 p-4 rounded-xl bg-slate-950 border border-slate-800 uppercase" placeholder="授權序號">
+<div class="w-full max-w-sm mx-4 bg-slate-900 p-8 rounded-3xl border border-slate-800">
 
-    <button onclick="login()" class="w-full bg-amber-500 text-black font-black py-4 rounded-2xl">
+    <h1 class="text-2xl font-black text-center mb-2 text-amber-500">
+        SUPER539
+    </h1>
+
+    <p class="text-center text-slate-400 text-sm mb-6">
+        雲端分析・會員裝置授權
+    </p>
+
+    <label for="name" class="block text-sm text-slate-300 mb-1">
+        會員姓名
+    </label>
+    <input
+        id="name"
+        autocomplete="name"
+        class="w-full mb-4 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white"
+        placeholder="請輸入會員姓名"
+    >
+
+    <label for="phone" class="block text-sm text-slate-300 mb-1">
+        手機號碼
+    </label>
+    <input
+        id="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        class="w-full mb-4 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white"
+        placeholder="請輸入手機號碼"
+    >
+
+    <label for="serial" class="block text-sm text-slate-300 mb-1">
+        授權序號
+    </label>
+    <input
+        id="serial"
+        autocomplete="off"
+        autocapitalize="characters"
+        class="w-full mb-6 p-4 rounded-xl bg-slate-950 border border-slate-800 text-white uppercase"
+        placeholder="請輸入授權序號"
+    >
+
+    <button
+        id="loginButton"
+        type="button"
+        onclick="login()"
+        class="w-full bg-amber-500 text-black font-black py-4 rounded-2xl disabled:opacity-50"
+    >
         綁定裝置
     </button>
+
+    <p class="text-xs text-slate-500 text-center mt-5">
+        請使用已取得授權的會員資料進行綁定
+    </p>
+
 </div>
+
 </body>
 </html>
