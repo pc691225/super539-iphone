@@ -1,21 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
     <title>539 AI 智能分析儀</title>
+
     <meta name="theme-color" content="#0F1115">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Super539">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icons/icon-180.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #0F1115;
@@ -27,68 +34,276 @@
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
         }
-        ::-webkit-scrollbar { width: 0; }
+
+        ::-webkit-scrollbar {
+            width: 0;
+        }
+
         .glass-card {
-            background: rgba(26, 29, 35, 0.8);
+            background: rgba(26, 29, 35, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
+
         .lottery-ball {
             background: linear-gradient(135deg, #ff4d4d, #d60000);
             box-shadow: 0 4px 15px rgba(214,0,0,.4);
             animation: pop .4s ease-out;
         }
-        @keyframes pop {
-            0% { transform: scale(.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+
+        .baseline-ball {
+            background: linear-gradient(135deg, #525c6b, #303744);
+            border: 1px solid rgba(255,255,255,.12);
         }
-        button:disabled { opacity: .55; cursor: not-allowed; }
+
+        @keyframes pop {
+            0% {
+                transform: scale(.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .ranking-row {
+            display: grid;
+            grid-template-columns: 42px 55px 1fr 65px;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 8px;
+            border-bottom: 1px solid rgba(255,255,255,.05);
+        }
+
+        .ranking-row:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-top {
+            background: rgba(220,38,38,.09);
+        }
+
+        .score-bar {
+            height: 6px;
+            border-radius: 99px;
+            background: #30343d;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg,#ef4444,#f97316);
+        }
     </style>
 </head>
+
 <body class="text-white" style="visibility:hidden">
-<nav class="sticky top-0 z-50 bg-[#0F1115]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between">
-    <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center"><i data-lucide="trophy"></i></div>
-        <h1 class="font-bold">539 AI智慧分析</h1>
+
+<nav class="sticky top-0 z-50 bg-[#0F1115]/90 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="trophy"></i>
+            </div>
+            <h1 class="font-bold">539 AI 智慧分析</h1>
+        </div>
+
+        <span class="text-xs text-green-400">雲端分析</span>
     </div>
 </nav>
+
 <main class="max-w-md mx-auto px-5 py-6 space-y-6 pb-24">
-    <div class="glass-card rounded-3xl p-5">
-        <p class="text-xs text-neutral-400">分析引擎</p>
-        <p class="text-lg font-bold">雲端即時模型</p>
-        <p id="connectionStatus" class="text-xs text-neutral-400 mt-2">正在檢查會員授權</p>
-    </div>
-    <div class="glass-card rounded-3xl p-5">
+
+    <!-- 分析引擎 -->
+    <section class="glass-card rounded-3xl p-5">
         <div class="flex items-center gap-2 mb-2">
-            <i data-lucide="database" class="text-green-400"></i><h2 class="font-bold">開獎資料管理</h2>
+            <i data-lucide="brain-circuit" class="text-red-400"></i>
+            <p class="text-xs text-neutral-400">分析引擎</p>
         </div>
-        <p class="text-sm text-neutral-400 mb-4">從台灣彩券資料來源更新今彩539開獎紀錄。</p>
-        <button id="updateButton" type="button" onclick="updateLotteryData()" class="w-full h-14 bg-green-600 hover:bg-green-700 rounded-2xl font-bold flex items-center justify-center gap-2">
-            <i data-lucide="refresh-cw"></i>更新開獎資料
+
+        <p class="text-lg font-bold">300 期相似案例加權模型</p>
+
+        <p id="connectionStatus" class="text-xs text-neutral-400 mt-2">
+            正在檢查會員授權
+        </p>
+    </section>
+
+    <!-- 今日推薦 -->
+    <section class="bg-[#1A1D23] rounded-[2.5rem] p-6 border border-white/10 shadow-2xl text-center">
+
+        <div class="flex items-center justify-center gap-2 mb-3">
+            <i data-lucide="target" class="text-red-400"></i>
+            <h2 class="text-2xl font-black">今日預測組合</h2>
+        </div>
+
+        <p class="text-xs text-neutral-500 mb-7">
+            每日一組・Android / iPhone 共用
+        </p>
+
+        <div id="ballContainer" class="flex justify-between gap-1 mb-7">
+            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
+            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
+            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
+            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
+            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
+        </div>
+
+        <div id="predictionInfo" class="text-xs text-neutral-400 mb-5 leading-6">
+            尚未取得今日推薦
+        </div>
+
+        <button
+            id="analysisButton"
+            type="button"
+            onclick="drawNumbers()"
+            class="w-full h-14 bg-white text-black rounded-2xl font-black text-lg">
+            <i data-lucide="sparkles" class="inline-block mr-1"></i>
+            啟動 AI 分析
         </button>
-        <p id="updateStatus" class="text-sm text-neutral-300 mt-4 leading-6">尚未執行更新</p>
-    </div>
-    <div class="bg-[#1A1D23] rounded-[2.5rem] p-8 border border-white/10 shadow-2xl text-center">
-        <h2 class="text-2xl font-black mb-8">今日預測組合</h2>
-        <div id="ballContainer" class="flex justify-between mb-10 px-1">
-            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
-            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
-            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
-            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
-            <div class="w-12 h-12 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center">?</div>
+
+        <p class="text-xs text-neutral-500 mt-4">
+            號碼組合僅供統計分析參考，不代表中獎機率提高。
+        </p>
+    </section>
+
+    <!-- 基準期 -->
+    <section class="glass-card rounded-3xl p-5">
+
+        <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="calendar-days" class="text-blue-400"></i>
+            <h2 class="font-bold">最新一期開獎基準</h2>
         </div>
-        <p id="predictionInfo" class="text-xs text-neutral-500 mb-4"></p>
-        <button id="analysisButton" type="button" onclick="drawNumbers()" class="w-full h-16 bg-white text-black rounded-2xl font-black text-lg">啟動 AI 分析</button>
-        <p class="text-xs text-neutral-500 mt-4">號碼組合僅供統計分析參考，不代表中獎機率提高。</p>
-    </div>
+
+        <p class="text-xs text-neutral-500 mb-3">分析使用的最新一期開獎資料</p>
+
+        <p id="baselineDate" class="text-sm font-bold mb-4">
+            尚未取得資料
+        </p>
+
+        <div id="baselineNumbers" class="flex justify-between gap-2">
+            <span class="text-neutral-600">-</span>
+            <span class="text-neutral-600">-</span>
+            <span class="text-neutral-600">-</span>
+            <span class="text-neutral-600">-</span>
+            <span class="text-neutral-600">-</span>
+        </div>
+
+    </section>
+
+    <!-- 分析統計 -->
+    <section class="glass-card rounded-3xl p-5">
+
+        <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="chart-no-axes-combined" class="text-purple-400"></i>
+            <h2 class="font-bold">相似案例分析</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+
+            <div class="bg-white/5 rounded-2xl p-4">
+                <p class="text-xs text-neutral-400 mb-2">歷史分析期數</p>
+                <p id="historyPeriods" class="text-2xl font-black">-</p>
+                <p class="text-xs text-neutral-500 mt-1">期</p>
+            </div>
+
+            <div class="bg-white/5 rounded-2xl p-4">
+                <p class="text-xs text-neutral-400 mb-2">符合相似案例</p>
+                <p id="matchedCases" class="text-2xl font-black text-red-400">-</p>
+                <p class="text-xs text-neutral-500 mt-1">筆</p>
+            </div>
+
+            <div class="bg-white/5 rounded-2xl p-4 col-span-2">
+                <p class="text-xs text-neutral-400 mb-2">有效開獎資料</p>
+                <p id="totalRows" class="text-xl font-bold">-</p>
+                <p class="text-xs text-neutral-500 mt-1">期</p>
+            </div>
+
+        </div>
+
+        <div class="mt-4 text-xs text-neutral-400 leading-6">
+            相似案例條件：歷史期數與最新一期至少有 1 個相同號碼。
+            相同 1～5 碼分別給予 1～5 分權重。
+        </div>
+
+    </section>
+
+    <!-- 加權排名 -->
+    <section class="glass-card rounded-3xl p-5">
+
+        <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="list-ordered" class="text-yellow-400"></i>
+            <h2 class="font-bold">01～39 加權排名</h2>
+        </div>
+
+        <p class="text-xs text-neutral-500 mb-4">
+            依加權總分、出現次數、最近出現位置及號碼大小排序
+        </p>
+
+        <div class="ranking-row text-xs text-neutral-500 font-bold">
+            <span>排名</span>
+            <span>號碼</span>
+            <span>加權分數</span>
+            <span class="text-right">出現次數</span>
+        </div>
+
+        <div id="rankingContainer">
+            <p class="text-center text-neutral-500 text-sm py-8">
+                尚未取得排名資料
+            </p>
+        </div>
+
+    </section>
+
+    <!-- 演算法說明 -->
+    <section class="glass-card rounded-3xl p-5">
+
+        <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="info" class="text-blue-400"></i>
+            <h2 class="font-bold">AI 分析規則</h2>
+        </div>
+
+        <div class="space-y-3 text-sm text-neutral-400 leading-6">
+
+            <p>① 以最新一期已開獎的五個號碼作為比較基準。</p>
+
+            <p>② 使用基準期之前最近 300 期歷史開獎資料。</p>
+
+            <p>③ 歷史期數至少命中 1 碼才納入相似案例。</p>
+
+            <p>④ 命中 1、2、3、4、5 碼，分別給予 1、2、3、4、5 分權重。</p>
+
+            <p>⑤ 將符合案例的下一期五個號碼累計加權分數。</p>
+
+            <p>⑥ 依加權總分、出現次數、最近出現位置、號碼大小排序。</p>
+
+            <p>⑦ 取前五名作為當日推薦，再由雲端保存為每日共用組合。</p>
+
+        </div>
+
+    </section>
+
+    <p class="text-center text-xs text-neutral-600 leading-6 pb-4">
+        Super539 雲端數據分析中心<br>
+        本系統僅提供歷史統計分析，不保證中獎。
+    </p>
+
 </main>
+
 <script>
 (() => {
     "use strict";
 
     const LOGIN_PAGE = "./login.html";
     const DEVICE_KEYS = ["super539_device_id", "app_device_id"];
+
     let accessVerified = false;
     let accessCheckInProgress = false;
 
@@ -100,29 +315,24 @@
         return "";
     }
 
-    function saveDeviceId(id) {
-        const value = String(id || "").trim();
-        if (!value) return;
-        DEVICE_KEYS.forEach(key => localStorage.setItem(key, value));
-    }
-
     function setConnectionStatus(message) {
         const element = document.getElementById("connectionStatus");
         if (element) element.textContent = message;
     }
 
-    function getErrorMessage(json) {
-        return json?.message || json?.error || "伺服器沒有提供詳細錯誤訊息";
-    }
-
     function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, char => ({
-            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
         })[char]);
     }
 
     function showPage() {
         document.body.style.visibility = "visible";
+
         if (window.lucide && typeof window.lucide.createIcons === "function") {
             window.lucide.createIcons();
         }
@@ -130,52 +340,84 @@
 
     function showAccessError(message) {
         showPage();
+
         document.body.innerHTML = `
             <main style="padding:32px;color:white;font-family:sans-serif;max-width:520px;margin:auto">
-                <h2 style="font-size:22px;margin-bottom:16px">無法驗證會員授權</h2>
-                <p style="line-height:1.8;margin-bottom:24px">${escapeHtml(message)}</p>
+                <h2 style="font-size:22px;margin-bottom:16px">
+                    無法驗證會員授權
+                </h2>
+
+                <p style="line-height:1.8;margin-bottom:24px">
+                    ${escapeHtml(message)}
+                </p>
+
                 <button id="retryAccessButton" type="button"
                     style="padding:12px 20px;background:#f59e0b;color:#111;border-radius:12px;font-weight:bold">
                     重新驗證
                 </button>
-                <p style="margin-top:16px"><a href="${LOGIN_PAGE}" style="color:#fbbf24">返回會員登入</a></p>
-            </main>`;
-        document.getElementById("retryAccessButton")?.addEventListener("click", verifyAccess);
+
+                <p style="margin-top:16px">
+                    <a href="${LOGIN_PAGE}" style="color:#fbbf24">
+                        返回會員登入
+                    </a>
+                </p>
+            </main>
+        `;
+
+        document.getElementById("retryAccessButton")
+            ?.addEventListener("click", verifyAccess);
     }
 
     function requireGasUrl() {
         if (typeof GAS_URL === "undefined" || !String(GAS_URL).trim()) {
             throw new Error("找不到 GAS API 網址，請檢查 config.js。");
         }
+
         return String(GAS_URL).trim();
     }
 
     async function apiGet(action, params = {}) {
-        const baseUrl = requireGasUrl();
-        const url = new URL(baseUrl);
+        const url = new URL(requireGasUrl());
+
         url.searchParams.set("action", action);
+
         Object.entries(params).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) url.searchParams.set(key, String(value));
+            if (value !== undefined && value !== null) {
+                url.searchParams.set(key, String(value));
+            }
         });
 
-        const response = await fetch(url.toString(), { method: "GET", cache: "no-store" });
-        if (!response.ok) throw new Error("伺服器 HTTP 狀態碼：" + response.status);
+        const response = await fetch(url.toString(), {
+            method: "GET",
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error("伺服器 HTTP 狀態碼：" + response.status);
+        }
+
         let json;
+
         try {
             json = await response.json();
         } catch {
             throw new Error("GAS 回應不是有效 JSON，請確認部署版本及 API 網址。");
         }
+
         return json;
+    }
+
+    function getErrorMessage(json) {
+        return json?.message || json?.error || "伺服器沒有提供詳細錯誤訊息";
     }
 
     async function verifyAccess() {
         if (accessCheckInProgress) return;
+
         accessCheckInProgress = true;
-        const retryButton = document.getElementById("retryAccessButton");
-        if (retryButton) retryButton.disabled = true;
 
         const deviceId = getDeviceId();
+
         if (!deviceId) {
             window.location.replace(LOGIN_PAGE);
             return;
@@ -183,21 +425,29 @@
 
         try {
             setConnectionStatus("正在檢查會員授權");
+
             const json = await apiGet("check_status", { deviceId });
 
             if (json.status === "success" && json.allowed === true) {
                 accessVerified = true;
+
                 showPage();
+
                 setConnectionStatus("會員授權驗證成功");
+
                 return;
             }
 
-            // 伺服器明確回覆未授權：不繼續顯示分析功能
             window.location.replace(LOGIN_PAGE);
+
         } catch (error) {
             console.error("會員授權檢查失敗：", error);
+
             accessCheckInProgress = false;
-            showAccessError(error.message || "目前無法驗證會員資格，請檢查網路後重試。");
+
+            showAccessError(
+                error.message || "目前無法驗證會員資格，請檢查網路後重試。"
+            );
         }
     }
 
@@ -206,51 +456,155 @@
             window.location.replace(LOGIN_PAGE);
             return false;
         }
+
         return true;
     }
 
-    async function updateLotteryData() {
-        if (!ensureAccess()) return;
+    function formatDate(value) {
+        if (!value) return "-";
 
-        const button = document.getElementById("updateButton");
-        const status = document.getElementById("updateStatus");
-        const deviceId = getDeviceId();
-        if (!deviceId) {
-            window.location.replace(LOGIN_PAGE);
+        return String(value).replace(/-/g, "/");
+    }
+
+    function renderBaseline(numbers) {
+        const container = document.getElementById("baselineNumbers");
+
+        if (!Array.isArray(numbers) || numbers.length !== 5) {
+            container.textContent = "資料格式錯誤";
             return;
         }
 
-        button.disabled = true;
-        button.textContent = "正在更新資料...";
-        status.textContent = "正在連線至雲端，請稍候。";
-        setConnectionStatus("正在更新開獎資料");
+        container.innerHTML = numbers.map(value => {
+            const n = Number(value);
 
-        try {
-            const json = await apiGet("update_539", { deviceId });
-            if (json.status !== "success" || json.allowed === false) {
-                if (json.allowed === false) {
-                    window.location.replace(LOGIN_PAGE);
-                    return;
-                }
-                throw new Error(getErrorMessage(json));
+            if (!Number.isInteger(n) || n < 1 || n > 39) {
+                throw new Error("最新一期基準號碼格式錯誤");
             }
 
-            status.innerHTML = `
-                <span class="text-green-400 font-bold">✓ 更新完成</span><br>
-                查詢資料：${Number(json.queriedRecords ?? 0)} 筆<br>
-                新增資料：${Number(json.insertedRecords ?? 0)} 筆<br>
-                略過無效資料：${Number(json.skippedInvalidRecords ?? 0)} 筆<br>
-                <span class="text-neutral-400">${escapeHtml(json.message || "開獎資料已處理完成")}</span>`;
-            setConnectionStatus("開獎資料更新成功");
-        } catch (error) {
-            status.innerHTML = `<span class="text-red-400 font-bold">更新失敗</span><br><span class="text-neutral-300">${escapeHtml(error.message || "請檢查網路或 GAS 設定")}</span>`;
-            setConnectionStatus("更新失敗");
-            console.error("更新539資料失敗：", error);
-        } finally {
-            button.disabled = false;
-            button.innerHTML = '<i data-lucide="refresh-cw"></i>更新開獎資料';
-            if (window.lucide) window.lucide.createIcons();
+            return `
+                <div class="baseline-ball w-11 h-11 rounded-full flex items-center justify-center font-black text-sm">
+                    ${String(n).padStart(2, "0")}
+                </div>
+            `;
+        }).join("");
+    }
+
+    function renderRecommendation(numbers) {
+        const container = document.getElementById("ballContainer");
+
+        if (!Array.isArray(numbers) || numbers.length !== 5) {
+            throw new Error("伺服器回傳的推薦號碼格式不正確");
         }
+
+        const validNumbers = numbers.map(Number);
+
+        if (
+            validNumbers.some(n =>
+                !Number.isInteger(n) || n < 1 || n > 39
+            ) ||
+            new Set(validNumbers).size !== 5
+        ) {
+            throw new Error("推薦號碼必須是 1 至 39 的五個不重複整數");
+        }
+
+        container.innerHTML = validNumbers.map(n => `
+            <div class="w-12 h-12 rounded-full lottery-ball flex items-center justify-center text-xl font-black">
+                ${String(n).padStart(2, "0")}
+            </div>
+        `).join("");
+    }
+
+    function renderRanking(ranking) {
+        const container = document.getElementById("rankingContainer");
+
+        if (!Array.isArray(ranking) || ranking.length !== 39) {
+            throw new Error("伺服器回傳的完整排名資料不正確");
+        }
+
+        const validRanking = ranking.map(item => ({
+            number: Number(item.number),
+            weightedScore: Number(item.weightedScore),
+            occurrenceCount: Number(item.occurrenceCount)
+        }));
+
+        const numbers = validRanking.map(item => item.number);
+
+        if (
+            validRanking.some(item =>
+                !Number.isInteger(item.number) ||
+                item.number < 1 ||
+                item.number > 39 ||
+                !Number.isFinite(item.weightedScore) ||
+                !Number.isFinite(item.occurrenceCount) ||
+                item.weightedScore < 0 ||
+                item.occurrenceCount < 0
+            ) ||
+            new Set(numbers).size !== 39
+        ) {
+            throw new Error("排名資料包含不合法數值");
+        }
+
+        const maxScore = Math.max(
+            1,
+            ...validRanking.map(item => item.weightedScore)
+        );
+
+        container.innerHTML = validRanking.map((item, index) => {
+            const rank = index + 1;
+
+            const percentage = Math.max(
+                0,
+                Math.min(100, item.weightedScore / maxScore * 100)
+            );
+
+            return `
+                <div class="ranking-row ${rank <= 5 ? "ranking-top" : ""}">
+
+                    <span class="text-xs ${rank <= 5 ? "text-yellow-400 font-black" : "text-neutral-500"}">
+                        ${String(rank).padStart(2, "0")}
+                    </span>
+
+                    <span class="font-black ${rank <= 5 ? "text-red-400" : "text-white"}">
+                        ${String(item.number).padStart(2, "0")}
+                    </span>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold">
+                                ${item.weightedScore.toLocaleString("zh-TW")}
+                            </span>
+                        </div>
+
+                        <div class="score-bar">
+                            <div class="score-fill" style="width:${percentage}%"></div>
+                        </div>
+                    </div>
+
+                    <span class="text-right text-xs text-neutral-400">
+                        ${item.occurrenceCount}
+                    </span>
+
+                </div>
+            `;
+        }).join("");
+    }
+
+    function renderAnalysis(json) {
+        document.getElementById("baselineDate").textContent =
+            "開獎日期：" + formatDate(json.baselineDate);
+
+        renderBaseline(json.baselineNumbers);
+
+        document.getElementById("historyPeriods").textContent =
+            Number(json.historyPeriods).toLocaleString("zh-TW");
+
+        document.getElementById("matchedCases").textContent =
+            Number(json.matchedCases).toLocaleString("zh-TW");
+
+        document.getElementById("totalRows").textContent =
+            Number(json.totalRows).toLocaleString("zh-TW");
+
+        renderRanking(json.ranking);
     }
 
     async function drawNumbers() {
@@ -259,58 +613,89 @@
         const box = document.getElementById("ballContainer");
         const button = document.getElementById("analysisButton");
         const info = document.getElementById("predictionInfo");
+
         const deviceId = getDeviceId();
+
         if (!deviceId) {
             window.location.replace(LOGIN_PAGE);
             return;
         }
 
         button.disabled = true;
-        box.innerHTML = '<div class="w-full text-center text-neutral-500">分析中...</div>';
+
+        box.innerHTML = `
+            <div class="w-full text-center text-neutral-500 py-4">
+                <div class="animate-pulse">正在進行雲端統計分析...</div>
+            </div>
+        `;
+
         info.textContent = "";
+
         setConnectionStatus("正在讀取分析資料");
 
         try {
             const json = await apiGet("get_analysis_data", { deviceId });
 
-            if (json.allowed === false || /設備未授權|請重新登入/.test(String(json.message || ""))) {
+            if (
+                json.allowed === false ||
+                /設備未授權|請重新登入/.test(String(json.message || ""))
+            ) {
                 window.location.replace(LOGIN_PAGE);
                 return;
             }
-            if (json.status !== "success") throw new Error(getErrorMessage(json));
 
-            const nums = json.recommended;
-            if (!Array.isArray(nums) || nums.length !== 5) {
-                throw new Error("伺服器回傳的推薦號碼格式不正確");
+            if (json.status !== "success") {
+                throw new Error(getErrorMessage(json));
             }
 
-            const validNums = nums.map(Number);
-            if (validNums.some(n => !Number.isInteger(n) || n < 1 || n > 39) ||
-                new Set(validNums).size !== 5) {
-                throw new Error("伺服器回傳的號碼必須是 1 至 39 的五個不重複整數");
-            }
+            // 顯示每日共享推薦
+            renderRecommendation(json.recommended);
 
-            box.innerHTML = validNums.map(n => `
-                <div class="w-12 h-12 rounded-full lottery-ball flex items-center justify-center text-xl font-black">${String(n).padStart(2, "0")}</div>
-            `).join("");
+            // 顯示最新一期及300期相似案例
+            renderAnalysis(json);
 
+            // 顯示預測建立時間
             if (json.predictionDateTime) {
-                info.textContent = `今日共用預測建立時間：${json.predictionDateTime}${json.predictionReused ? "（沿用今日預測）" : "（今日首次建立）"}`;
+                info.textContent =
+                    "今日共用預測建立時間：" +
+                    json.predictionDateTime +
+                    (
+                        json.predictionReused
+                            ? "（沿用今日已儲存推薦）"
+                            : "（今日首次建立）"
+                    );
+            } else {
+                info.textContent = "今日共用推薦已取得";
             }
-            setConnectionStatus("分析資料讀取完成");
+
+            setConnectionStatus("雲端分析完成");
+
         } catch (error) {
-            box.innerHTML = `<div class="w-full text-center text-red-400 text-sm">${escapeHtml(error.message || "資料讀取失敗")}</div>`;
+            box.innerHTML = `
+                <div class="w-full text-center text-red-400 text-sm py-4">
+                    ${escapeHtml(error.message || "資料讀取失敗")}
+                </div>
+            `;
+
             setConnectionStatus("分析失敗");
+
             console.error("539分析失敗：", error);
+
         } finally {
             button.disabled = false;
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
         }
     }
 
-    window.updateLotteryData = updateLotteryData;
     window.drawNumbers = drawNumbers;
+
     window.addEventListener("DOMContentLoaded", verifyAccess);
+
 })();
 </script>
+
 </body>
 </html>
